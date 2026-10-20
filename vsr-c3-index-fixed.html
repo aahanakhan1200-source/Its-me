@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="hi" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#070B14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VSR C3">
+<meta name="description" content="STAY WITH VSR — Channel Command Center. PIN + Pattern + Face ID + Voice Passphrase. Offline PWA.">
+<title>STAY WITH VSR — Channel Command Center v4</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<style>
+:root{
+  --bg:#060A12; --bg2:#0A1120; --panel:#0F1828; --panel2:#131F33; --panel3:#0B1424;
+  --line:#22304A; --line2:#2C3D5C;
+  --txt:#E8EEF9; --muted:#8FA0BC; --dim:#64748B;
+  --gold:#D4AF37; --gold2:#F3D67C; --teal:#35D6E8; --green:#43D17F;
+  --red:#FF4D5E; --amber:#FFB020; --violet:#A78BFA; --pink:#F472B6;
+  --r:14px; --r2:20px;
+  --shadow:0 18px 44px -20px rgba(0,0,0,.9);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,"Noto Sans Devanagari",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%; overscroll-behavior:none}
+body{
+  font-family:var(--sans); background:var(--bg); color:var(--txt);
+  font-size:15px; line-height:1.55; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  touch-action:manipulation;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(1100px 560px at 88% -12%, rgba(53,214,232,.10), transparent 62%),
+    radial-gradient(900px 500px at -8% 8%, rgba(212,175,55,.10), transparent 60%),
+    linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+}
+
+/* ======= BOOT / SPLASH ======= */
+#bootScreen{
+  position:fixed; inset:0; z-index:9999; background:#070B14;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+#bootScreen.gone{display:none}
+.boot-bg{position:absolute; inset:0; overflow:hidden}
+.boot-bg::before, .boot-bg::after{
+  content:""; position:absolute; border-radius:50%;
+  background:radial-gradient(circle, rgba(53,214,232,.25), transparent 70%);
+  filter:blur(40px);
+}
+.boot-bg::before{width:600px;height:600px; top:-200px; left:-150px; animation:float1 8s ease-in-out infinite}
+.boot-bg::after{width:500px;height:500px; bottom:-150px; right:-150px; background:radial-gradient(circle, rgba(212,175,55,.25), transparent 70%); animation:float2 9s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,40px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-30px)}}
+
+.boot-logo-wrap{
+  position:relative; z-index:2;
+  animation:logoIn 1.4s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes logoIn{
+  0%{opacity:0; transform:scale(.3) rotate(-180deg)}
+  60%{opacity:1; transform:scale(1.15) rotate(0)}
+  100%{transform:scale(1)}
+}
+.boot-logo{
+  width:160px;height:160px; border-radius:36px;
+  background:linear-gradient(160deg,#16233A,#0A1120);
+  border:2px solid rgba(212,175,55,.6);
+  display:grid; place-items:center;
+  position:relative;
+  box-shadow:0 20px 60px -10px rgba(0,0,0,.8), inset 0 0 40px rgba(53,214,232,.15);
+  animation:logoGlow 3s ease-in-out infinite;
+}
+@keyframes logoGlow{
+  0%,100%{box-shadow:0 20px 60px -10px rgba(0,0,0,.8), 0 0 40px rgba(53,214,232,.4), inset 0 0 30px rgba(212,175,55,.1)}
+  50%{box-shadow:0 20px 60px -10px rgba(0,0,0,.8), 0 0 70px rgba(53,214,232,.7), inset 0 0 50px rgba(212,175,55,.2)}
+}
+.boot-logo svg{width:90px;height:90px; animation:logoSpin 6s linear infinite}
+@keyframes logoSpin{0%,80%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.boot-pulse-rings{position:absolute; inset:-30px; pointer-events:none}
+.boot-pulse-rings::before, .boot-pulse-rings::after{
+  content:""; position:absolute; inset:0; border-radius:46px; border:2px solid rgba(53,214,232,.6);
+  animation:pulseRing 2.4s ease-out infinite;
+}
+.boot-pulse-rings::after{animation-delay:1.2s}
+@keyframes pulseRing{
+  0%{opacity:1; transform:scale(.9)}
+  100%{opacity:0; transform:scale(1.4)}
+}
+
+.boot-title{
+  margin-top:28px; font-family:var(--mono); font-weight:800;
+  font-size:22px; letter-spacing:.35em; color:var(--gold2);
+  text-shadow:0 0 20px rgba(212,175,55,.5);
+  animation:fadeUp .8s .6s both;
+}
+.boot-sub{
+  margin-top:8px; font-family:var(--mono); font-size:11px; letter-spacing:.4em;
+  color:var(--muted); animation:fadeUp .8s .9s both;
+}
+.boot-credit{
+  position:absolute; bottom:36px; left:0; right:0; text-align:center;
+  font-family:var(--mono); font-size:12px; letter-spacing:.25em; color:var(--teal);
+  text-shadow:0 0 18px rgba(53,214,232,.6);
+  animation:fadeUp .8s 1.2s both, creditPulse 2.6s 2s infinite;
+}
+@keyframes creditPulse{0%,100%{opacity:.85}50%{opacity:1; text-shadow:0 0 28px rgba(53,214,232,.9)}}
+@keyframes fadeUp{from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)}}
+
+.boot-bar{
+  position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+  width:180px; height:3px; background:rgba(255,255,255,.1); border-radius:3px; overflow:hidden;
+}
+.boot-bar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--teal),var(--gold)); animation:bootLoad 2.6s ease forwards}
+@keyframes bootLoad{to{width:100%}}
+
+/* ======= LOCK SCREEN ======= */
+#lockScreen{
+  position:fixed; inset:0; z-index:90; background:var(--bg);
+  display:none; align-items:center; justify-content:center;
+  padding:20px; overflow-y:auto;
+}
+#lockScreen.on{display:flex; animation:lockIn .35s ease}
+@keyframes lockIn{from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)}}
+.lock-card{
+  width:100%; max-width:380px; background:linear-gradient(170deg,var(--panel),var(--panel3));
+  border:1px solid var(--line); border-radius:22px; padding:24px 22px;
+  box-shadow:0 30px 80px -30px #000, inset 0 1px 0 rgba(255,255,255,.05);
+}
+.lock-head{text-align:center; margin-bottom:18px}
+.lock-head .badge{
+  width:64px;height:64px; margin:0 auto 10px;
+  border-radius:18px;
+  background:linear-gradient(160deg,#16233A,#0A1120);
+  border:2px solid rgba(212,175,55,.55);
+  display:grid; place-items:center; font-family:var(--mono); font-weight:800; color:var(--gold2); font-size:16px;
+  letter-spacing:.03em;
+  box-shadow:0 0 28px rgba(53,214,232,.3);
+  animation:badgeFloat 3s ease-in-out infinite;
+}
+@keyframes badgeFloat{50%{transform:translateY(-4px)}}
+.lock-head h2{margin:0 0 4px; font-size:18px; letter-spacing:.15em; color:var(--gold2); font-family:var(--mono)}
+.lock-head p{margin:0; font-size:11px; color:var(--dim); letter-spacing:.18em; text-transform:uppercase}
+
+.mode-tabs{display:flex; gap:6px; background:#080E1A; padding:4px; border-radius:30px; border:1px solid var(--line); margin-bottom:14px}
+.mode-tabs button{
+  flex:1; background:transparent; border:0; color:var(--muted); padding:10px 6px; border-radius:26px;
+  font-size:11.5px; font-family:var(--mono); letter-spacing:.08em; cursor:pointer; transition:.18s; text-transform:uppercase;
+  -webkit-tap-highlight-color:transparent;
+}
+.mode-tabs button.on{background:linear-gradient(180deg,rgba(53,214,232,.2),rgba(53,214,232,.06)); color:var(--teal); box-shadow:0 0 0 1px rgba(53,214,232,.35) inset}
+
+.pin-dots{display:flex; gap:11px; justify-content:center; margin:4px 0 16px; min-height:16px}
+.pin-dots i{
+  width:13px;height:13px;border-radius:50%; border:1.5px solid var(--line2);
+  transition:.16s; display:block;
+}
+.pin-dots i.f{background:var(--teal); border-color:var(--teal); box-shadow:0 0 12px rgba(53,214,232,.7); transform:scale(1.12)}
+.pin-dots i.bad{background:var(--red); border-color:var(--red); animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#pinInput{
+  width:100%; text-align:center; background:#080E1A; border:1px solid var(--line);
+  border-radius:12px; color:var(--gold2); font-family:var(--mono); font-size:22px;
+  letter-spacing:.5em; padding:14px 10px; outline:none; transition:.2s;
+}
+#pinInput:focus{border-color:var(--teal); box-shadow:0 0 0 3px rgba(53,214,232,.12)}
+
+.keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:14px}
+.keypad button{
+  background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--line);
+  color:var(--txt); font-family:var(--mono); font-size:19px; padding:15px 0; border-radius:12px;
+  cursor:pointer; transition:.12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.keypad button:active{transform:scale(.94); background:var(--line)}
+.keypad button[data-k="del"]{color:var(--amber); font-size:15px}
+.keypad button[data-k="ok"]{color:var(--green); font-size:15px}
+
+.err{color:var(--red); font-size:12px; min-height:17px; text-align:center; margin-top:8px; font-weight:600}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  background:var(--panel2); border:1px solid var(--line); color:var(--txt);
+  padding:11px 15px; border-radius:11px; font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:.15s; white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  position:relative; overflow:hidden;
+}
+.btn:active{transform:scale(.97)}
+.btn:hover{border-color:var(--line2)}
+.btn.primary{background:linear-gradient(135deg,var(--teal),#1FA8BC); color:#04121A; border-color:transparent; box-shadow:0 10px 26px -14px rgba(53,214,232,.9)}
+.btn.gold{background:linear-gradient(135deg,var(--gold),#B8912A); color:#150F00; border-color:transparent; box-shadow:0 10px 26px -14px rgba(212,175,55,.9)}
+.btn.ghost{background:transparent}
+.btn.wide{width:100%)}
+.btn.wide2{width:100%}
+
+/* pattern */
+.pattern-wrap{position:relative; width:min(72vw,280px); aspect-ratio:1; margin:8px auto 6px; touch-action:none}
+.pattern-wrap svg{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+.dot-grid{position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr)}
+.dot-grid b{
+  margin:auto; width:22px; height:22px; border-radius:50%; background:var(--panel2);
+  border:2px solid var(--line2); display:block; transition:.14s; position:relative;
+}
+.dot-grid b::after{content:""; position:absolute; inset:-15px; border-radius:50%}
+.dot-grid b.on{border-color:var(--teal); background:var(--teal); box-shadow:0 0 18px rgba(53,214,232,.85); transform:scale(1.25)}
+.dot-grid b.bad{border-color:var(--red); background:var(--red); box-shadow:0 0 18px rgba(255,77,94,.8)}
+
+/* voice */
+.voice-orb{
+  width:120px;height:120px; margin:10px auto;
+  border-radius:50%; background:radial-gradient(circle, rgba(53,214,232,.3), rgba(53,214,232,.05));
+  border:2px solid rgba(53,214,232,.5);
+  display:grid; place-items:center; font-size:46px;
+  position:relative;
+  animation:voiceIdle 3s ease-in-out infinite;
+}
+.voice-orb.listening{animation:voiceListen 1s ease-in-out infinite; background:radial-gradient(circle, rgba(67,209,127,.5), rgba(67,209,127,.1)); border-color:var(--green)}
+.voice-orb.match{animation:voiceMatch .6s ease; background:radial-gradient(circle, rgba(67,209,127,.8), rgba(67,209,127,.2)); border-color:var(--green); box-shadow:0 0 50px rgba(67,209,127,.7)}
+@keyframes voiceIdle{50%{transform:scale(1.05)}}
+@keyframes voiceListen{0%,100%{transform:scale(1)}50%{transform:scale(1.12); box-shadow:0 0 40px rgba(67,209,127,.6)}}
+@keyframes voiceMatch{0%{transform:scale(.6)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* ======= APP SHELL ======= */
+#appShell{display:none; position:relative; z-index:2; min-height:100vh}
+#appShell.on{display:block}
+
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:258px; z-index:60;
+  background:linear-gradient(180deg,var(--panel3),var(--bg));
+  border-right:1px solid var(--line); padding:16px 12px 80px; overflow-y:auto;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+@media(max-width:760px){
+  .sidebar{transform:translateX(-110%); box-shadow:30px 0 80px -20px #000}
+  .sidebar.open{transform:none}
+  .main{margin-left:0 !important}
+  .topbar h2{font-size:16px !important}
+  #drawerBtn{display:grid !important}
+}
+.brandrow{display:flex; gap:10px; align-items:center; padding:4px 6px 14px; border-bottom:1px solid var(--line); margin-bottom:12px; cursor:pointer}
+.brandmark{
+  width:42px;height:42px;border-radius:12px;display:grid;place-items:center; flex:0 0 auto;
+  border:1px solid rgba(212,175,55,.45); background:linear-gradient(160deg,#16233A,#0A1120);
+  font-family:var(--mono); font-weight:800; color:var(--gold2); font-size:12.5px;
+}
+.brandrow h1{font-size:12.5px; letter-spacing:.15em; font-family:var(--mono); color:var(--txt); margin:0}
+.brandrow p{font-size:10px; color:var(--dim); letter-spacing:.16em; margin:2px 0 0; text-transform:uppercase}
+
+.nav{display:flex; flex-direction:column; gap:3px}
+.nav .grp{font-size:9.5px; letter-spacing:.22em; color:var(--dim); text-transform:uppercase;
+  padding:14px 10px 6px; font-family:var(--mono)}
+.nav button{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:transparent; border:1px solid transparent; color:var(--muted);
+  padding:11px 11px; border-radius:10px; font-size:13px; cursor:pointer; transition:.15s; font-weight:500;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav button:active{transform:scale(.98)}
+.nav button .ico{
+  width:28px;height:28px;border-radius:8px; display:grid;place-items:center; flex:0 0 auto;
+  background:rgba(53,214,232,.08); border:1px solid var(--line); font-size:13px;
+}
+.nav button:hover{background:rgba(255,255,255,.035); color:var(--txt)}
+.nav button.on{
+  background:linear-gradient(90deg,rgba(53,214,232,.16),rgba(53,214,232,.02));
+  color:var(--txt); border-color:rgba(53,214,232,.3); box-shadow:inset 2px 0 0 var(--teal);
+}
+.nav button.on .ico{background:rgba(53,214,232,.2); border-color:rgba(53,214,232,.45)}
+.nav button .badge{
+  margin-left:auto; background:var(--red); color:#fff; font-size:9.5px; font-weight:800;
+  padding:1px 6px; border-radius:20px; animation:pulseBadge 1.4s infinite;
+}
+@keyframes pulseBadge{50%{opacity:.45}}
+
+.main{margin-left:258px; padding:16px 20px 90px; max-width:1180px}
+.topbar{display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:nowrap}
+.topbar > div{min-width:0; flex:1 1 auto}
+.topbar h2{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:19px; letter-spacing:.3px; margin:0}
+.topbar .sub{font-size:11.5px; color:var(--muted); margin-top:2px}
+.ver{font-family:var(--mono); font-size:10px; color:var(--gold2); border:1px solid rgba(212,175,55,.35);
+  padding:3px 8px; border-radius:20px; letter-spacing:.1em}
+.iconbtn{
+  width:38px;height:38px;border-radius:11px; display:grid;place-items:center; cursor:pointer; flex:0 0 auto;
+  background:var(--panel2); border:1px solid var(--line); color:var(--txt); font-size:15px; transition:.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.iconbtn:active{transform:scale(.94)}
+#drawerBtn{display:none}
+
+.scrim{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:55; opacity:0; pointer-events:none; transition:.2s; backdrop-filter:blur(2px)}
+.scrim.on{opacity:1; pointer-events:auto}
+
+/* cards */
+.card{
+  background:linear-gradient(170deg,var(--panel),var(--panel3)); border:1px solid var(--line);
+  border-radius:var(--r); padding:16px; margin-bottom:14px; box-shadow:var(--shadow); position:relative;
+  transition:transform .2s, box-shadow .2s;
+}
+.card > h3{font-size:14px; margin:0 0 4px; display:flex; align-items:center; gap:8px; letter-spacing:.2px}
+.card > h3 .ic{
+  width:30px;height:30px;border-radius:9px;display:grid;place-items:center; flex:0 0 auto;
+  background:linear-gradient(160deg,rgba(53,214,232,.18),rgba(212,175,55,.1));
+  border:1px solid var(--line); font-size:14px;
+}
+.card .hint{font-size:12px; color:var(--muted); margin:6px 0 12px; line-height:1.55}
+.grid{display:grid; gap:11px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kpi{
+  background:linear-gradient(165deg,var(--panel2),var(--panel3)); border:1px solid var(--line);
+  border-radius:12px; padding:12px 13px; position:relative; overflow:hidden;
+}
+.kpi .lab{font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); font-family:var(--mono)}
+.kpi .val{font-size:22px; font-weight:800; margin:4px 0 1px; letter-spacing:-.4px}
+.kpi .foot{font-size:10.5px; color:var(--muted)}
+
+label.f{display:block; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--dim); font-family:var(--mono); margin-bottom:4px}
+input[type=text],input[type=number],input[type=date],input[type=password],input[type=url],select,textarea{
+  width:100%; background:#080E1A; border:1px solid var(--line); border-radius:9px;
+  color:var(--txt); padding:10px 11px; font-size:14px; font-family:inherit; outline:none; transition:.15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--teal); box-shadow:0 0 0 3px rgba(53,214,232,.1)}
+textarea{min-height:120px; resize:vertical; line-height:1.6; font-size:13px}
+.row{display:flex; gap:9px; flex-wrap:wrap; align-items:flex-end}
+.row > div{flex:1; min-width:120px}
+.kv{
+  display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line);
+  border-radius:11px; background:var(--panel3); margin-bottom:8px; cursor:pointer; transition:.15s;
+}
+.kv:active{transform:scale(.99)}
+.kv > span{flex:1; min-width:0; font-size:13px; text-align:left}
+.pill{display:inline-block; font-family:var(--mono); font-size:10.5px; padding:2.5px 8px;
+  border-radius:20px; border:1px solid var(--line2); color:var(--muted); font-weight:700; letter-spacing:.04em}
+.pill.ok{color:var(--green); border-color:rgba(67,209,127,.45); background:rgba(67,209,127,.1)}
+.pill.warn{color:var(--amber); border-color:rgba(255,176,32,.45); background:rgba(255,176,32,.1)}
+.pill.bad{color:var(--red); border-color:rgba(255,77,94,.45); background:rgba(255,77,94,.1)}
+.pill.teal{color:var(--teal); border-color:rgba(53,214,232,.45); background:rgba(53,214,232,.1)}
+.pill.gold{color:var(--gold2); border-color:rgba(212,175,55,.45); background:rgba(212,175,55,.1)}
+.note{font-size:12px; line-height:1.6; color:var(--muted); background:rgba(53,214,232,.055);
+  border-left:2px solid var(--teal); padding:9px 11px; border-radius:0 9px 9px 0; margin:8px 0}
+.note.warnb{background:rgba(255,176,32,.075); border-left-color:var(--amber)}
+.note.dangerb{background:rgba(255,77,94,.075); border-left-color:var(--red)}
+.note.goodb{background:rgba(67,209,127,.07); border-left-color:var(--green)}
+.empty{text-align:center; padding:22px 12px; color:var(--dim); font-size:12.5px}
+.empty b{display:block; color:var(--muted); margin-bottom:3px; font-size:13px}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:26px;
+  border:1px solid var(--line); background:var(--panel2); font-size:12px; cursor:pointer; transition:.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.chip.on{border-color:var(--teal); background:rgba(53,214,232,.14); color:var(--teal); font-weight:700}
+
+/* views - section slide animation */
+.view{display:none}
+.view.on{
+  display:block;
+  animation:viewIn .42s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes viewIn{
+  0%{opacity:0; transform:translateX(30px) scale(.98)}
+  60%{opacity:1; transform:translateX(-4px) scale(1.01)}
+  100%{opacity:1; transform:translateX(0) scale(1)}
+}
+
+/* modal */
+.modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px)}
+.modal-bg.on{display:flex; animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  width:100%; max-width:480px; max-height:85vh; overflow-y:auto;
+  background:linear-gradient(170deg,var(--panel),var(--panel3));
+  border:1px solid var(--line2); border-radius:18px;
+  box-shadow:0 40px 100px -30px #000;
+  animation:modalIn .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes modalIn{from{transform:translateY(40px) scale(.92); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
+.modal-hd{display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line)}
+.modal-hd h3{margin:0; font-size:15px; letter-spacing:.05em}
+.modal-hd .x{cursor:pointer; font-size:20px; color:var(--muted); padding:4px 10px; border-radius:8px}
+.modal-hd .x:active{background:rgba(255,77,94,.15); color:var(--red)}
+.modal-bd{padding:16px 18px}
+
+/* toast */
+.toast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px);
+  padding:11px 18px; border-radius:30px; background:linear-gradient(135deg,var(--teal),#1FA8BC); color:#04121A;
+  font-weight:800; font-size:13px; box-shadow:0 14px 40px -10px rgba(53,214,232,.6);
+  z-index:300; opacity:0; pointer-events:none; transition:.3s; letter-spacing:.04em; max-width:90%; text-align:center;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.bad{background:linear-gradient(135deg,var(--red),#C4212F); color:#fff; box-shadow:0 14px 40px -10px rgba(255,77,94,.6)}
+
+/* award/floor */
+.sidefoot{position:fixed; bottom:0; left:0; right:0; padding:10px 16px; border-top:1px solid var(--line);
+  font-size:10px; color:var(--dim); font-family:var(--mono); background:var(--bg); z-index:50}
+
+/* image card with slide-in */
+.media-card{
+  margin:10px 0;
+  border-radius:14px; overflow:hidden;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  position:relative;
+  background:linear-gradient(135deg,var(--panel2),var(--panel3));
+}
+.media-card .media-bg{height:120px; background:linear-gradient(135deg, rgba(53,214,232,.3), rgba(212,175,55,.3)); position:relative; overflow:hidden}
+.media-card .media-bg::after{content:""; position:absolute; inset:0; background:radial-gradient(circle at 30% 50%, rgba(212,175,55,.4), transparent 60%);}
+.media-card .media-icon{position:absolute; bottom:-15px; left:18px; width:60px; height:60px; border-radius:16px;
+  background:linear-gradient(160deg,#16233A,#0A1120); border:2px solid var(--gold);
+  display:grid; place-items:center; font-size:24px; box-shadow:0 8px 20px rgba(0,0,0,.5);
+}
+.media-card .media-body{padding:14px 16px 14px 88px}
+.media-card .media-title{font-size:14px; font-weight:700; letter-spacing:.05em}
+.media-card .media-sub{font-size:11px; color:var(--muted); margin-top:4px; line-height:1.5}
+
+/* signature bottom */
+.c3-credit{margin-top:24px; text-align:center; font-family:var(--mono); font-size:11px; letter-spacing:.3em; color:var(--gold2); opacity:.7; padding:8px 0; border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<!-- ===== BOOT SPLASH ===== -->
+<div id="bootScreen">
+  <div class="boot-bg"></div>
+  <div class="boot-logo-wrap">
+    <div class="boot-pulse-rings"></div>
+    <div class="boot-logo">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#D4AF37"/>
+            <stop offset="1" stop-color="#F3D67C"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 46 L24 18 L32 32 L40 18 L54 46" fill="none" stroke="url(#g1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="32" cy="52" r="3.5" fill="#35D6E8"/>
+        <path d="M16 54 Q32 58 48 54" fill="none" stroke="#35D6E8" stroke-width="1.5" opacity="0.7"/>
+      </svg>
+    </div>
+  </div>
+  <div class="boot-title">STAY WITH VSR</div>
+  <div class="boot-sub">CHANNEL COMMAND CENTER · v4.0</div>
+  <div class="boot-credit">— MADE BY VSR —</div>
+  <div class="boot-bar"><i></i></div>
+</div>
+
+<!-- ===== ONBOARDING ===== -->
+<div id="onboard" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd">
+      <h3>🔐 पहला कदम — PIN सेट करें</h3>
+    </div>
+    <div class="modal-bd">
+      <p style="font-size:13px; color:var(--muted); margin-top:0">चार या ज़्यादा अंकों का PIN चुनिए। यह आपके vault की चाबी है।</p>
+      <label class="f">PIN</label>
+      <input type="password" id="onbPin" inputmode="numeric" maxlength="12" placeholder="••••" autofocus>
+      <label class="f" style="margin-top:12px">PIN दोबारा</label>
+      <input type="password" id="onbPin2" inputmode="numeric" maxlength="12" placeholder="••••">
+      <div class="err" id="onbErr"></div>
+      <button class="btn gold wide2" id="onbGo" style="margin-top:14px; font-size:14px; padding:14px">Vault बनाइए ▸</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOCK SCREEN ===== -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-head">
+      <div class="badge">VSR</div>
+      <h2>STAY WITH VSR</h2>
+      <p>CHANNEL COMMAND CENTER</p>
+    </div>
+    <div class="mode-tabs" id="lockTabs">
+      <button data-m="pin" class="on">PIN</button>
+      <button data-m="pat">Pattern</button>
+      <button data-m="bio">Face ID</button>
+      <button data-m="voice">🎙 Voice</button>
+    </div>
+
+    <div id="modePin">
+      <div class="pin-dots" id="pinDots"></div>
+      <input id="pinInput" type="password" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••">
+      <div id="pinConfirmWrap" style="display:none"><input id="pinConfirm" type="password" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="PIN दोबारा"></div>
+      <div class="keypad" id="keypad">
+        <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+        <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+        <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+        <button data-k="del">⌫</button><button data-k="0">0</button><button data-k="ok">✓</button>
+      </div>
+      <div class="err" id="lockErr"></div>
+      <button class="btn primary wide2" id="lockBtn" style="margin-top:6px">खोलिए</button>
+    </div>
+
+    <div id="modePat" style="display:none">
+      <div class="pattern-wrap" id="patternWrap">
+        <svg viewBox="0 0 100 100" id="patSvg"><polyline id="patLine" fill="none" stroke="#35D6E8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points=""/></svg>
+        <div class="dot-grid" id="patDots">
+          <b data-i="0"></b><b data-i="1"></b><b data-i="2"></b>
+          <b data-i="3"></b><b data-i="4"></b><b data-i="5"></b>
+          <b data-i="6"></b><b data-i="7"></b><b data-i="8"></b>
+        </div>
+      </div>
+      <p class="tiny center" id="patHint" style="margin-top:8px; font-size:11px; color:var(--muted)">नया pattern बनाइए — 4+ dots</p>
+      <div class="err" id="patErr"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="patClear">Clear</button>
+        <button class="btn primary" id="patSave" style="display:none">Pattern सेव करें</button>
+      </div>
+    </div>
+
+    <div id="modeBio" style="display:none">
+      <div class="center" style="padding:14px 0 8px">
+        <div style="font-size:48px">🧬</div>
+        <p style="font-size:13px;margin-top:10px">फ़ोन का Face ID / Fingerprint</p>
+        <p style="font-size:11px;color:var(--muted); margin-top:6px; line-height:1.5">
+          WebAuthn — फ़ोन की अपनी biometric।<br>
+          <span style="color:var(--amber); font-weight:700">⚠ HTTPS ज़रूरी — Plain HTTP/file:// पर काम नहीं करेगा।</span>
+        </p>
+      </div>
+      <div class="err" id="bioErr"></div>
+      <button class="btn primary wide2" id="bioBtn">Face ID / Fingerprint शुरू करें</button>
+      <button class="btn ghost wide2" id="bioSetupBtn" style="margin-top:8px">इस डिवाइस पर चालू करें</button>
+    </div>
+
+    <div id="modeVoice" style="display:none">
+      <div class="center" style="padding:14px 0 6px">
+        <div class="voice-orb" id="voiceOrb">🎙️</div>
+        <p style="font-size:13px;margin-top:12px">अपना <b>voice passphrase</b> बोलिए</p>
+        <p style="font-size:11px;color:var(--muted); margin-top:6px; line-height:1.5">
+          Voice = सिर्फ़ <b>convenience unlock</b>।<br>
+          true face/voice match web app में offline reliably नहीं हो सकता।
+        </p>
+      </div>
+      <div class="err" id="voiceErr"></div>
+      <button class="btn primary wide2" id="voiceBtn">🎤 बोलना शुरू करें</button>
+      <button class="btn gold wide2" id="voiceSetBtn" style="margin-top:8px">Passphrase Set/बदलें</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- ============== APP ============== -->
+<div id="appShell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brandrow" id="brandRow">
+      <div class="brandmark">VSR</div>
+      <div>
+        <h1>STAY WITH VSR</h1>
+        <p>CHANNEL COMMAND CENTER</p>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="grp">रोज़ का काम</div>
+      <button data-view="overview" class="on"><span class="ico">◈</span><span>Overview</span></button>
+      <button data-view="comp"><span class="ico">🛰️</span><span>Competitor Radar</span></button>
+      <button data-view="topics"><span class="ico">✦</span><span>Topic Pipeline</span></button>
+      <button data-view="script"><span class="ico">🖋</span><span>Script Vault</span></button>
+      <button data-view="log"><span class="ico">▤</span><span>Daily Log</span></button>
+      <button data-view="card"><span class="ico">◎</span><span>Video Report Card</span></button>
+      <div class="grp">दिमाग़</div>
+      <button data-view="notes"><span class="ico">🔔</span><span>Notes &amp; Reminders</span></button>
+      <button data-view="manifest"><span class="ico">👑</span><span>Manifestation</span></button>
+      <div class="grp">हिसाब</div>
+      <button data-view="weekly"><span class="ico">▦</span><span>Weekly Summary</span></button>
+      <button data-view="rules"><span class="ico">⚖</span><span>Rulebook</span></button>
+      <button data-view="ask"><span class="ico">?</span><span>पूछिए</span></button>
+      <div class="grp">सिस्टम</div>
+      <button data-view="settings"><span class="ico">⚙</span><span>Settings</span></button>
+    </nav>
+    <div class="sidefoot">v4.0 · made by VSR</div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="topbar">
+      <button class="iconbtn" id="drawerBtn">☰</button>
+      <div>
+        <h2 id="pageTitle">Overview</h2>
+        <div id="pageSub" class="sub">Channel की एक नज़र</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="iconbtn" id="lockNow" title="Lock">🔒</button>
+      <button class="iconbtn" id="themeBtn" title="Theme">🌓</button>
+      <div class="ver" id="ver">v4.0 · VSR</div>
+    </div>
+
+    <div id="rootViews"></div>
+
+    <div class="c3-credit">— MADE BY VSR —</div>
+  </main>
+</div>
+
+<!-- ============== TOAST / MODAL HOSTS ============== -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal">
+    <div class="modal-hd">
+      <h3 id="modalTitle">—</h3>
+      <span class="x" id="modalX">✕</span>
+    </div>
+    <div class="modal-bd" id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast">—</div>
+
+<script>
+/* ===========================================================
+   UTILITIES
+   =========================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const save = () => { try{ localStorage.setItem('vsrC3', JSON.stringify(S)); }catch(e){} };
+const load = () => { try{ S = Object.assign(S, JSON.parse(localStorage.getItem('vsrC3')||'{}')); }catch(e){} };
+let S = {
+  pin:null, pat:null, bioId:null, vpSet:false, vp:'',
+  onboarded:false, lang:'hi', theme:'dark', view:'overview',
+  settings:{ apiKey:'', region:'IN', relLang:'hi' },
+  myChannel:'', competitors:[], scripts:[], logs:[], cards:[],
+  notes:[], manifest:{milestones:[],cars:[],bank:0}, rules:'',
+  seenBriefs:{}, lastDailyBrief:''
+};
+load();
+
+const LANG = () => S.lang || 'hi';
+const hash = s => { let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h)^s.charCodeAt(i); return (h>>>0).toString(36); };
+
+/* ===========================================================
+   WEB AUDIO — sounds
+   =========================================================== */
+let AC = null;
+function audioCtx(){
+  if(!AC){
+    try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  return AC;
+}
+function beep(freq=440, dur=0.06, type='sine', vol=0.18){
+  const ac = audioCtx(); if(!ac) return;
+  if(ac.state==='suspended') ac.resume();
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.value = vol;
+  o.connect(g); g.connect(ac.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+dur);
+  o.stop(ac.currentTime+dur+0.02);
+}
+const SFX = {
+  tap:   ()=>{ beep(780, 0.05, 'triangle', 0.18); setTimeout(()=>beep(1200, 0.04, 'sine', 0.14), 18); },
+  type:  ()=>{ beep(620 + Math.random()*180, 0.03, 'sine', 0.10); },
+  ok:    ()=>{ beep(660, 0.10, 'sine', 0.20); setTimeout(()=>beep(990, 0.10, 'sine', 0.20), 90); setTimeout(()=>beep(1320, 0.13, 'triangle', 0.18), 200); },
+  bad:   ()=>{ beep(180, 0.18, 'sawtooth', 0.20); setTimeout(()=>beep(120, 0.22, 'sawtooth', 0.20), 90); },
+  open:  ()=>{ beep(440, 0.07, 'sine', 0.14); setTimeout(()=>beep(660, 0.07, 'sine', 0.14), 50); setTimeout(()=>beep(880, 0.10, 'triangle', 0.16), 110); },
+  close: ()=>{ beep(880, 0.06, 'sine', 0.14); setTimeout(()=>beep(440, 0.08, 'sine', 0.16), 50); },
+  swipe: ()=>{ beep(330, 0.06, 'triangle', 0.12); setTimeout(()=>beep(550, 0.06, 'triangle', 0.12), 30); setTimeout(()=>beep(770, 0.08, 'sine', 0.14), 70); },
+  unlock:()=>{ beep(523, 0.10, 'sine', 0.18); setTimeout(()=>beep(659, 0.10, 'sine', 0.18), 100); setTimeout(()=>beep(784, 0.10, 'sine', 0.18), 200); setTimeout(()=>beep(1047, 0.20, 'triangle', 0.20), 320); },
+};
+
+/* ===========================================================
+   TOAST / MODAL
+   =========================================================== */
+function toast(msg, bad=false){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.toggle('bad', !!bad);
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.classList.remove('on'); }, 2200);
+}
+function modal(title, body, onclick){
+  $('#modalTitle').textContent = title;
+  if(typeof body==='string') $('#modalBody').innerHTML = body;
+  else if(body) { $('#modalBody').innerHTML=''; body.forEach(n=>$('#modalBody').appendChild(n)); }
+  $('#modalBg').classList.add('on');
+  SFX.open();
+  $('#modalX').onclick = closeModal;
+  $('#modalBg').onclick = e => { if(e.target.id==='modalBg') closeModal(); };
+  if(onclick) onclick($('#modalBody'));
+}
+function closeModal(){ $('#modalBg').classList.remove('on'); SFX.close(); }
+
+/* ===========================================================
+   BOOT → LOCK/APP
+   =========================================================== */
+function hideBoot(){
+  const b = $('#bootScreen');
+  b.classList.add('gone');
+  setTimeout(()=>{ b.style.display='none'; }, 500);
+  try{
+    if(navigator.vibrate) navigator.vibrate([10, 30, 15]);
+    SFX.unlock();
+  }catch(e){}
+}
+window.addEventListener('load', ()=>{
+  setTimeout(hideBoot, 2800);
+});
+
+/* ===========================================================
+   LOCK — PIN / PATTERN / BIO / VOICE
+   =========================================================== */
+let patSeq=[], patMode='unlock', patTmp=null;
+const bio64 = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64 = s => { s=s.replace(/-/g,'+').replace(/_/g,'/'); const pad=s.length%4?4-s.length%4:0;
+  const bin = atob(s+'='.repeat(pad));
+  const u = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+  return u.buffer; };
+
+function setLockMode(m){
+  ['pin','pat','bio','voice'].forEach(x => {
+    const id = 'mode'+x.charAt(0).toUpperCase()+x.slice(1);
+    const el = document.getElementById(id);
+    if(el) el.style.display = (x===m)?'block':'none';
+  });
+  $$('#lockTabs button').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
+  SFX.swipe();
+  if(m==='pat'){ patDraw_reset(); }
+  if(m==='voice'){ setTimeout(()=>{ /* ready */ }, 50); }
+}
+$('#lockTabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-m]'); if(!b) return;
+  setLockMode(b.dataset.m);
+});
+
+function drawDots(){
+  const v = $('#pinInput').value;
+  const n = Math.max(4, Math.min(10, v.length || (S.pin?S.pin.length:4)));
+  $('#pinDots').innerHTML = Array.from({length:n},(_,i)=>'<i class="'+(i<v.length?'f':'')+'"></i>').join('');
+}
+
+function fail(msg){
+  $('#lockErr').textContent = msg;
+  $$('#pinDots i').forEach(i=>i.classList.add('bad'));
+  if(navigator.vibrate) navigator.vibrate([60,80,60]);
+  SFX.bad();
+  setTimeout(()=>{ $$('#pinDots i').forEach(i=>i.classList.remove('bad')); }, 380);
+}
+
+function tryUnlock(){
+  if(!S.pin){ /* first time go to onboard */
+    const v = $('#pinInput').value;
+    if(v.length<4){ fail('कम से कम 4 अंक'); return; }
+    $('#pinInput').value=''; drawDots();
+    $('#pinConfirmWrap').style.display='block';
+    $('#pinConfirm').focus();
+    $('#lockErr').textContent = 'दोबारा डालकर ✓ दबाइए';
+    if(!S._pinTemp){ S._pinTemp = v; }
+    else if(S._pinTemp === v){
+      S.pin = hash(v); S.onboarded = true; save();
+      SFX.unlock(); toast('PIN सेट हो गया ✓');
+      unlockOk();
+    } else {
+      fail('PIN मेल नहीं खाया'); $('#pinInput').value=''; drawDots(); S._pinTemp=null;
+    }
+    return;
+  }
+  const v = $('#pinInput').value;
+  if(!v){ fail('PIN डालिए'); return; }
+  if(hash(v) === S.pin){ SFX.unlock(); unlockOk(); }
+  else { fail('ग़लत PIN'); $('#pinInput').value=''; drawDots(); }
+}
+
+$$('#keypad button').forEach(b=>{
+  b.onclick = () => {
+    const k = b.dataset.k, inp = $('#pinInput');
+    SFX.tap();
+    if(k==='del'){ inp.value = inp.value.slice(0,-1); }
+    else if(k==='ok'){ tryUnlock(); return; }
+    else if(inp.value.length < 10){ inp.value += k; SFX.type(); }
+    drawDots();
+    $('#lockErr').textContent='';
+    if(navigator.vibrate) navigator.vibrate(8);
+  };
+});
+$('#pinInput').addEventListener('input', ()=>{ drawDots(); $('#lockErr').textContent=''; });
+$('#pinInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ tryUnlock(); }
+});
+$('#lockBtn').onclick = tryUnlock;
+
+/* ---------- PATTERN (FIXED) ---------- */
+function patCoords(i){ const c=[16.6,50,83.3]; return {x:c[i%3], y:c[Math.floor(i/3)]}; }
+
+function patDraw_reset(){
+  patSeq = []; patTmp = null;
+  $$('#patDots b').forEach(b=>b.classList.remove('on','bad'));
+  $('#patLine').setAttribute('points','');
+  $('#patErr').textContent='';
+  if(!S.pat){
+    patMode = 'set';
+    $('#patSave').style.display = 'inline-flex';
+    $('#patHint').textContent = 'नया pattern बनाइए — 4+ dots';
+  } else {
+    patMode = 'unlock';
+    $('#patSave').style.display = 'none';
+    $('#patHint').textContent = 'pattern बनाइए';
+  }
+}
+function patDraw(){
+  const pts = patSeq.map(i=>{ const c=patCoords(i); return c.x+','+c.y; });
+  if(patTmp) pts.push(patTmp.x+','+patTmp.y);
+  $('#patLine').setAttribute('points', pts.join(' '));
+}
+function patAdd(i){
+  if(patSeq.includes(i)) return;
+  patSeq.push(i);
+  $(`#patDots b[data-i="${i}"]`).classList.add('on');
+  patDraw();
+  if(navigator.vibrate) navigator.vibrate(7);
+  SFX.tap();
+}
+// FIX: previous code reset patSeq inside touchstart which wiped stored patTmp.
+// Now touchstart resets the visual points only — patSeq is built by addDots
+// and only cleared on touchend/explicit Reset.
+function patEnd(){
+  patTmp=null; patDraw();
+  const seq = patSeq.join('');
+  if(patSeq.length < 4){
+    $('#patErr').textContent = 'कम से कम 4 dots';
+    flashPatBad(); return;
+  }
+  if(patMode==='set'){
+    patTmp = seq;
+    $('#patErr').textContent='';
+    $('#patHint').textContent = 'दोबारा बनाइए (कन्फ़र्म)';
+    patMode = 'confirm';
+    // visual reset only
+    patSeq = []; patTmp_stored = patTmp; // keep stored
+    $$('#patDots b').forEach(b=>b.classList.remove('on','bad'));
+    $('#patLine').setAttribute('points','');
+    if(navigator.vibrate) navigator.vibrate(15);
+    SFX.swipe();
+    return;
+  }
+  if(patMode==='confirm'){
+    // patTmp is the first pattern
+    if(seq === patTmp_stored){
+      S.pat = hash(seq); save();
+      SFX.unlock(); toast('Pattern सेव हो गया ✓');
+      patMode='unlock'; patTmp=null; patTmp_stored=null;
+      patSeq=[]; $$('#patDots b').forEach(b=>b.classList.remove('on','bad'));
+      $('#patLine').setAttribute('points','');
+      $('#patHint').textContent = 'pattern सेव हो गया ✓';
+      setTimeout(unlockOk, 300);
+    } else {
+      $('#patErr').textContent = 'मेल नहीं खाया — दोबारा शुरू करें';
+      flashPatBad();
+      patMode='set'; patTmp=null; patTmp_stored=null;
+    }
+    return;
+  }
+  if(patMode==='unlock'){
+    if(hash(seq) === S.pat){ SFX.unlock(); unlockOk(); }
+    else { $('#patErr').textContent = 'ग़लत pattern'; flashPatBad(); if(navigator.vibrate) navigator.vibrate([40,60,40]); SFX.bad(); }
+  }
+}
+let patTmp_stored = null;
+function flashPatBad(){
+  $$('#patDots b.on').forEach(b=>{b.classList.remove('on');b.classList.add('bad');});
+  setTimeout(()=>{
+    patSeq=[]; patTmp=null; patTmp_stored=null;
+    $$('#patDots b').forEach(b=>b.classList.remove('on','bad'));
+    $('#patLine').setAttribute('points','');
+  }, 500);
+}
+
+(function wirePattern(){
+  const wrap = $('#patternWrap');
+  const pick = (e)=>{
+    const r = wrap.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    const x = ((p.clientX-r.left)/r.width)*100, y = ((p.clientY-r.top)/r.height)*100;
+    let best=-1, bd=1e9;
+    for(let i=0;i<9;i++){ const c=patCoords(i); const d=Math.hypot(c.x-x,c.y-y); if(d<bd){bd=d;best=i;} }
+    if(bd<16) patAdd(best);
+    patTmp = {x,y};
+    if(patSeq.length) patDraw();
+  };
+  // FIX: do NOT reset here. Reset only on confirm-begin or bad flash.
+  wrap.addEventListener('touchstart', e=>{ patTmp=null; pick(e); e.preventDefault(); }, {passive:false});
+  wrap.addEventListener('touchmove',  e=>{ pick(e); e.preventDefault(); }, {passive:false});
+  wrap.addEventListener('touchend',   e=>{ patEnd(); e.preventDefault(); }, {passive:false});
+  wrap.addEventListener('mousedown', e=>{
+    patTmp=null; pick(e);
+    const mv = ev=>pick(ev);
+    const up = ()=>{ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); patEnd(); };
+    document.addEventListener('mousemove',mv);
+    document.addEventListener('mouseup',up);
+    e.preventDefault();
+  });
+
+  $('#patClear').onclick = ()=>{
+    patSeq=[]; patTmp=null; patTmp_stored=null;
+    $$('#patDots b').forEach(b=>b.classList.remove('on','bad'));
+    $('#patLine').setAttribute('points','');
+    $('#patErr').textContent='';
+    if(S.pat) patMode='unlock'; else patMode='set';
+    SFX.tap();
+  };
+  $('#patSave').onclick = ()=>{
+    // user explicitly moved to confirm early
+    if(patMode==='set' && patSeq.length>=4){
+      patTmp_stored = patSeq.join('');
+      patSeq=[]; patMode='confirm';
+      $$('#patDots b').forEach(b=>b.classList.remove('on','bad'));
+      $('#patLine').setAttribute('points','');
+      $('#patHint').textContent = 'दोबारा बनाइए (कन्फ़र्म)';
+      $('#patErr').textContent='';
+    } else if(patSeq.length<4){
+      $('#patErr').textContent = 'पहले 4 dots बनाइए';
+    }
+  };
+})();
+
+/* ---------- BIOMETRIC (WebAuthn) ---------- */
+async function enableBio(){
+  const ac = audioCtx(); if(!ac) SFX.tap();
+  try{
+    if(!window.PublicKeyCredential){ $('#bioErr').textContent='इस ब्राउज़र में WebAuthn नहीं है'; return; }
+    const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+    const userId = new Uint8Array(16); crypto.getRandomValues(userId);
+    const cred = await navigator.credentials.create({
+      publicKey:{
+        challenge, rp:{name:'VSR C3'}, user:{id:userId, name:'vsr', displayName:'VSR'},
+        pubKeyCredParams:[{type:'public-key', alg:-7}],
+        authenticatorSelection:{userVerification:'required', authenticatorAttachment:'platform'},
+        timeout:60000, attestation:'none'
+      }
+    });
+    S.bioId = bio64(cred.rawId);
+    save(); SFX.unlock();
+    toast('Face ID चालू हो गया ✓');
+    setTimeout(unlockOk, 350);
+  } catch(e){
+    $('#bioErr').textContent = 'WebAuthन त्रुटि: '+(e.message||e.name||'unknown')+(location.protocol==='file:'?' — HTTPS ज़रूरी है':'');
+    SFX.bad();
+  }
+}
+async function unlockBio(){
+  try{
+    if(!S.bioId){ $('#bioErr').textContent='पहले "इस डिवाइस पर चालू करें" दबाइए'; return; }
+    if(!window.PublicKeyCredential){ $('#bioErr').textContent='WebAuthn नहीं है'; return; }
+    const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+    const id = unb64(S.bioId);
+    await navigator.credentials.get({
+      publicKey:{
+        challenge, allowCredentials:[{type:'public-key', id}],
+        userVerification:'required', timeout:60000
+      }
+    });
+    SFX.unlock(); unlockOk();
+  } catch(e){
+    $('#bioErr').textContent='बायोमेट्रिक असफल: '+(e.message||e.name||'')+'  '+(location.protocol==='file:'?'— HTTPS ज़रूरी':'');
+    SFX.bad();
+  }
+}
+$('#bioBtn').onclick = unlockBio;
+$('#bioSetupBtn').onclick = enableBio;
+
+/* ---------- VOICE PASSPHRASE (convenience only) ---------- */
+let SR = null;
+function vlistening(on){
+  const orb = $('#voiceOrb');
+  if(!orb) return;
+  orb.classList.toggle('listening', !!on);
+}
+function normalize(t){ return (t||'').toLowerCase().replace(/[^a-z0-9\u0900-\u097F\s]/g,'').replace(/\s+/g,' ').trim(); }
+function lev(a, b){
+  if(a===b) return 0; if(!a.length) return b.length; if(!b.length) return a.length;
+  const m=Array.from({length:b.length+1},(_,i)=>[i]);
+  for(let j=0;j<a.length;j++){ m[0][j+1]=j+1; }
+  for(let i=1;i<=b.length;i++){ for(let j=1;j<=a.length;j++){
+    m[i][j] = b[i-1]===a[j-1]?m[i-1][j-1] : Math.min(m[i-1][j-1]+1, m[i][j-1]+1, m[i-1][j]+1);
+  }} return m[b.length][a.length];
+}
+function voiceMatch(heard){
+  const target = normalize(S.vp||''); const got = normalize(heard);
+  if(!target) return {ok:false, reason:'no-phrase'};
+  if(got === target) return {ok:true, score:1};
+  const dist = lev(target, got);
+  const score = 1 - dist / Math.max(target.length,1);
+  return {ok: score>=0.78, score, dist};
+}
+async function startVoiceListen(){
+  const SRc = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SRc){ $('#voiceErr').textContent='इस ब्राउज़र में Speech Recognition नहीं है (Chrome/Edge चाहिए)'; SFX.bad(); return false; }
+  $('#voiceErr').textContent='';
+  if(!S.vp){ $('#voiceErr').textContent='पहले Passphrase Set करें'; SFX.bad(); return false; }
+  if(SR) try{ SR.stop(); }catch(e){}
+  SR = new SRc();
+  SR.lang = S.lang==='en'?'en-IN':(S.lang==='hg'?'hi-IN':'hi-IN');
+  SR.interimResults = false; SR.maxAlternatives = 3;
+  vlistening(true);
+  SR.onresult = (e)=>{
+    vlistening(false);
+    let best = null, bestOk = null;
+    for(let i=0;i<e.results.length;i++){
+      for(let j=0;j<e.results[i].length;j++){
+        const r = voiceMatch(e.results[i][j].transcript);
+        if(!best || r.score>best.score){ best = r; bestOk = e.results[i][j].transcript; }
+      }
+    }
+    if(best && best.ok){
+      $('#voiceOrb').classList.add('match');
+      SFX.unlock(); toast('Voice match ✓');
+      setTimeout(()=>{ $('#voiceOrb').classList.remove('match'); unlockOk(); }, 400);
+    } else {
+      $('#voiceErr').textContent='Match नहीं हुआ — कोशिश फिर से। ('+(bestOk||'')+')';
+      SFX.bad();
+    }
+  };
+  SR.onerror = e => { vlistening(false); $('#voiceErr').textContent='Mic error: '+e.error; SFX.bad(); };
+  SR.onend = ()=>{ vlistening(false); };
+  try{ SR.start(); return true; }
+  catch(e){ vlistening(false); $('#voiceErr').textContent='Mic start नहीं हुआ'; SFX.bad(); return false; }
+}
+function setupVoice(){
+  modal('🎙 Voice Passphrase', `
+    <p style="font-size:13px;color:var(--muted);margin-top:0">एक आसान वाक्य बोलिए जो आप याद रख सकें (3+ शब्द)। यह <b>convenience unlock</b> है — किसी और की आवाज़ से reliably अलग पहचानना web app में offline possible नहीं है।</p>
+    <label class="f">Passphrase</label>
+    <input id="vpInput" type="text" placeholder="जैसे: stay with vsr always">
+    <div class="err" id="vpErr"></div>
+    <button class="btn gold wide2" id="vpSave" style="margin-top:14px">💾 Save Passphrase</button>
+    <button class="btn wide2" id="vpTry" style="margin-top:8px">🎤 Test — बोलकर देखें</button>
+  `, ()=>{
+    $('#vpInput').value = S.vp||'';
+    $('#vpSave').onclick = ()=>{
+      const v = $('#vpInput').value.trim();
+      if(v.split(/\s+/).filter(Boolean).length < 3){ $('#vpErr').textContent='कम से कम 3 शब्द'; SFX.bad(); return; }
+      S.vp = v; S.vpSet = true; save(); SFX.ok(); toast('Voice passphrase set ✓');
+      setTimeout(closeModal, 600);
+    };
+    $('#vpTry').onclick = ()=>{
+      const old = S.vp; S.vp = $('#vpInput').value.trim() || old;
+      closeModal(); setTimeout(()=>{ setLockMode('voice'); startVoiceListen(); }, 200);
+    };
+  });
+}
+$('#voiceBtn').onclick = startVoiceListen;
+$('#voiceSetBtn').onclick = setupVoice;
+
+/* ===========================================================
+   UNLOCK OK / LOCK NOW
+   =========================================================== */
+function unlockOk(){
+  $('#lockScreen').classList.remove('on');
+  $('#appShell').classList.add('on');
+  showView(S.view||'overview');
+  renderOverview();
+  if(navigator.vibrate) navigator.vibrate([15,30,15]);
+}
+function lockNow(){
+  save();
+  $('#appShell').classList.remove('on');
+  $('#lockScreen').classList.add('on');
+  setLockMode('pin');
+  $('#pinInput').value=''; drawDots();
+  SFX.close();
+}
+
+/* ===========================================================
+   APP SHELL + NAVIGATION (FIX: event delegation)
+   =========================================================== */
+const VIEWS = {
+  overview: { ic:'◈', t:'Overview', s:'Channel की एक नज़र' },
+  comp:     { ic:'🛰️', t:'Competitor Radar', s:'Niche के channels पर नज़र' },
+  topics:   { ic:'✦', t:'Topic Pipeline', s:'Script से पहले 25 का score' },
+  script:   { ic:'🖋', t:'Script Vault', s:'हर script सेव, हर बदलाव compare' },
+  log:      { ic:'▤', t:'Daily Log', s:'हर video के असली numbers' },
+  card:     { ic:'◎', t:'Video Report Card', s:'हर video से एक सीख' },
+  notes:    { ic:'🔔', t:'Notes & Reminders', s:'जो भूलना नहीं है' },
+  manifest: { ic:'👑', t:'Manifestation Vault', s:'लक्ष्य, तारीख़ें, सपने' },
+  weekly:   { ic:'▦', t:'Weekly Summary', s:'हफ़्ते का हिसाब खुद' },
+  rules:    { ic:'⚖', t:'Rulebook', s:'Channel के नियम' },
+  ask:      { ic:'?', t:'पूछिए', s:'सीधा जवाब' },
+  settings: { ic:'⚙', t:'Settings', s:'भाषा, सुरक्षा, backup' }
+};
+
+function buildViews(){
+  const root = $('#rootViews');
+  const def = (id, title) => `<section class="view" id="view-${id}"><h3 style="margin-top:0">${title}</h3><div id="vd-${id}"></div></section>`;
+  root.innerHTML = Object.keys(VIEWS).map(k => def(k, VIEWS[k].t)).join('');
+}
+buildViews();
+
+let CUR = 'overview';
+function showView(v){
+  if(!VIEWS[v]) v='overview';
+  CUR = v; S.view = v; save();
+  $$('.view').forEach(s => s.classList.toggle('on', s.id==='view-'+v));
+  $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view===v));
+  $('#pageTitle').textContent = VIEWS[v].t;
+  $('#pageSub').textContent = VIEWS[v].s;
+  $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('on');
+  window.scrollTo({top:0, behavior:'smooth'});
+  sound_for_view(v);
+}
+function sound_for_view(v){
+  SFX.swipe();
+}
+
+/* FIX: Event delegation on sidebar — single handler works even
+   if buttons get cloned/replaced later. */
+$('#nav').addEventListener('click', e => {
+  const b = e.target.closest('button[data-view]');
+  if(!b) return;
+  showView(b.dataset.view);
+});
+
+/* Drawer wiring */
+const drawerBtn = $('#drawerBtn');
+if(drawerBtn){
+  drawerBtn.onclick = ()=>{
+    $('#sidebar').classList.toggle('open');
+    $('#scrim').classList.toggle('on');
+    SFX.tap();
+  };
+}
+$('#scrim').onclick = ()=>{ $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('on'); SFX.close(); };
+$('#brandRow').onclick = ()=> showView('overview');
+
+/* Top bar */
+$('#lockNow').onclick = lockNow;
+$('#themeBtn').onclick = ()=>{
+  const n = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = n; S.theme = n; save(); SFX.tap();
+};
+
+/* Global click sound for buttons (excluding nav which has its own handler) */
+document.addEventListener('click', e => {
+  if(!e.target.closest('#nav')){ /* no-op */ }
+}, { passive:true });
+
+/* ===========================================================
+   RENDER FUNCTIONS — kept simple but fully working
+   =========================================================== */
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+
+function renderOverview(){
+  const root = $('#vd-overview');
+  const videos7d = S.logs.filter(l => (Date.now()-new Date(l.date).getTime()) < 7*86400e3).length;
+  const viewsAvg = (()=> { const a = S.logs.map(l=>+l.v7).filter(x=>x>0); return a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0; })();
+  const pending = (S.notes||[]).filter(n=>!n.done).length;
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">🎯</span> Mission Control</h3>
+      <p class="hint">Channel का हाल — एक नज़र में।</p>
+      <div class="grid g3">
+        <div class="kpi"><div class="lab">Videos (7d)</div><div class="val">${videos7d}</div><div class="foot">इस हफ़्ते</div></div>
+        <div class="kpi"><div class="lab">Avg Views</div><div class="val">${viewsAvg}</div><div class="foot">पिछले 7 दिन</div></div>
+        <div class="kpi"><div class="lab">Pending Notes</div><div class="val">${pending}</div><div class="foot">अनदेखे</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="ic">🚀</span> Quick Start</h3>
+      <p class="hint">जो बार-बार चाहिए वो यहाँ से।</p>
+      <div class="grid g2">
+        <div class="kv" onclick="vsrGoAndPlay('topics')"><span><b>✦ Topic Pipeline</b><br><span class="tiny">नया video idea score करें</span></span><span class="pill teal">GO</span></div>
+        <div class="kv" onclick="vsrGoAndPlay('script')"><span><b>🖋 Script Vault</b><br><span class="tiny">आज का script लिखें</span></span><span class="pill gold">GO</span></div>
+        <div class="kv" onclick="vsrGoAndPlay('log')"><span><b>▤ Daily Log</b><br><span class="tiny">7 दिन बाद views भरें</span></span><span class="pill teal">GO</span></div>
+        <div class="kv" onclick="vsrGoAndPlay('notes')"><span><b>🔔 Notes</b><br><span class="tiny">ब्रेन-डंप करें</span></span><span class="pill warn">GO</span></div>
+      </div>
+    </div>
+    <div class="media-card">
+      <div class="media-bg"></div>
+      <div class="media-icon">◈</div>
+      <div class="media-body"><div class="media-title">Command Centre Live</div><div class="media-sub">हर view में animated slide-in — किसी REAL app जैसा। नीचे tap करें — हर section खुलते ही sound + slide।</div></div>
+    </div>
+  `;
+}
+
+window.vsrGoAndPlay = (v) => { showView(v); };
+
+function renderComp(){
+  const root = $('#vd-comp');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">🛰️</span> Competitor Radar</h3>
+      <p class="hint">अपनी niche के channels — auto (YouTube API key) या manual।</p>
+      <div class="row">
+        <div><label class="f">YouTube API Key</label><input type="text" id="cApiKey" placeholder="AIza..." value="${S.settings.apiKey||''}"></div>
+        <div style="flex:0 0 auto"><button class="btn primary" id="cSave">Save</button></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><label class="f">Add Channel Handle</label><input id="cChan" placeholder="@MrBeast"></div>
+        <div style="flex:0 0 auto"><button class="btn" id="cAdd">+ Add</button></div>
+      </div>
+      <div id="cList" style="margin-top:10px"></div>
+    </div>
+  `;
+  const paint = () => {
+    const L = $('#cList');
+    L.innerHTML = (S.competitors||[]).length? S.competitors.map((c,i)=>`
+      <div class="kv"><span><b>${c.name}</b><br><span class="tiny">${c.handle||''}</span></span>
+        <button class="btn sm danger" onclick="vsrDelComp(${i})">Remove</button></div>
+    `).join('') : `<div class="empty"><b>कोई channel नहीं</b>ऊपर handle डालकर Add दबाइए</div>`;
+  };
+  paint();
+  $('#cSave').onclick = ()=>{ S.settings.apiKey = $('#cApiKey').value.trim(); save(); SFX.ok(); toast('API key saved'); };
+  $('#cAdd').onclick = ()=>{
+    const h = $('#cChan').value.trim(); if(!h){ SFX.bad(); return; }
+    S.competitors = S.competitors||[]; S.competitors.push({name:h, handle:h}); save();
+    $('#cChan').value=''; paint(); SFX.ok();
+  };
+}
+window.vsrDelComp = i => { S.competitors.splice(i,1); save(); renderComp(); SFX.tap(); };
+
+function renderTopics(){
+  const root = $('#vd-topics');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">✦</span> Topic Pipeline</h3>
+      <p class="hint">हर topic को 25 में से score करो। सिर्फ़ 18+ बनाओ।</p>
+      <div class="row">
+        <div style="flex:2"><label class="f">Topic</label><input id="tName"></div>
+        <div style="flex:0 0 80px"><label class="f">Score</label><input id="tScore" type="number" min="0" max="25" placeholder="/25"></div>
+      </div>
+      <button class="btn gold wide2" id="tAdd" style="margin-top:10px">+ Add Topic</button>
+      <div id="tList" style="margin-top:14px"></div>
+    </div>
+  `;
+  const list = $('#tList');
+  const paint = ()=>{
+    const A = S.topics||[];
+    list.innerHTML = A.length? A.map((tp,i)=>{
+      const c = tp.score>=18?'teal':(tp.score>=12?'warn':'bad');
+      return `<div class="kv"><span><b>${tp.name}</b></span><span class="pill ${c}">${tp.score||0}/25</span>
+        <button class="btn sm danger" onclick="vsrDelTopic(${i})">×</button></div>`;
+    }).join('') : `<div class="empty"><b>कोई topic नहीं</b>ऊपर से जोड़ें</div>`;
+  };
+  paint();
+  $('#tAdd').onclick = ()=>{
+    const n = $('#tName').value.trim(), sc = +$('#tScore').value||0;
+    if(!n){ SFX.bad(); return; }
+    S.topics = S.topics||[]; S.topics.push({name:n, score:sc}); save();
+    $('#tName').value=''; $('#tScore').value=''; paint(); SFX.ok();
+  };
+}
+window.vsrDelTopic = i => { S.topics.splice(i,1); save(); renderTopics(); SFX.tap(); };
+
+function renderScript(){
+  const root = $('#vd-script');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">🖋</span> Script Vault</h3>
+      <p class="hint">हर दिन का script save हो जाता है। Compare: पुराना vs नया।</p>
+      <textarea id="scBody" placeholder="यहाँ script लिखें..." style="min-height:200px"></textarea>
+      <button class="btn gold wide2" id="scSave" style="margin-top:10px">💾 Today's Script Save</button>
+      <div id="scList" style="margin-top:14px"></div>
+    </div>
+  `;
+  const list = $('#scList');
+  const paint = ()=>{
+    const A = S.scripts||[];
+    list.innerHTML = A.length? A.slice().reverse().map((s,i)=>{
+      const idx = A.length-1-i;
+      return `<div class="kv" onclick="vsrShowScript(${idx})"><span><b>${s.date}</b><br><span class="tiny">${(s.body||'').slice(0,80)}...</span></span><span class="pill teal">OPEN</span></div>`;
+    }).join('') : `<div class="empty"><b>कोई script नहीं</b></div>`;
+  };
+  paint();
+  $('#scSave').onclick = ()=>{
+    const b = $('#scBody').value.trim(); if(!b){ SFX.bad(); return; }
+    S.scripts = S.scripts||[]; S.scripts.push({date:todayISO(), body:b}); save();
+    $('#scBody').value=''; paint(); SFX.ok(); toast('Script saved ✓');
+  };
+}
+window.vsrShowScript = i => { const s = S.scripts[i]; modal(`📜 ${s.date}`, `<pre style="white-space:pre-wrap;font-family:inherit">${s.body}</pre>`); };
+
+function renderLog(){
+  const root = $('#vd-log');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">▤</span> Daily Log</h3>
+      <p class="hint">7 दिन बाद views, ctr, retention भरें — pattern दिखेगा।</p>
+      <div class="row">
+        <div><label class="f">Date</label><input id="lDate" type="date" value="${todayISO()}"></div>
+        <div><label class="f">Title</label><input id="lTitle"></div>
+        <div><label class="f">Views (7d)</label><input id="lV" type="number" placeholder="0"></div>
+        <div style="flex:0 0 auto"><button class="btn gold" id="lAdd">+ Add</button></div>
+      </div>
+      <div id="lList" style="margin-top:14px"></div>
+    </div>
+  `;
+  const list = $('#lList');
+  const paint = ()=>{
+    const A = S.logs||[];
+    list.innerHTML = A.length? A.slice().reverse().map((l,i)=>{
+      const idx = A.length-1-i;
+      const v = +l.v7||0;
+      const cls = v>=1500?'ok':(v>=500?'warn':(v>=200?'teal':'bad'));
+      return `<div class="kv"><span><b>${l.date}</b> — ${l.title}</span><span class="pill ${cls}">${v} views</span>
+        <button class="btn sm danger" onclick="vsrDelLog(${idx})">×</button></div>`;
+    }).join('') : `<div class="empty"><b>कोई log नहीं</b></div>`;
+  };
+  paint();
+  $('#lAdd').onclick = ()=>{
+    const d = $('#lDate').value, t = $('#lTitle').value.trim(), v = +$('#lV').value||0;
+    if(!t){ SFX.bad(); return; }
+    S.logs = S.logs||[]; S.logs.push({date:d, title:t, v7:v}); save();
+    $('#lTitle').value=''; $('#lV').value=''; paint(); SFX.ok();
+  };
+}
+window.vsrDelLog = i => { S.logs.splice(i,1); save(); renderLog(); SFX.tap(); };
+
+function renderCard(){
+  const root = $('#vd-card');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">◎</span> Video Report Card</h3>
+      <p class="hint">हर video से एक सीख — एक लाइन में।</p>
+      <textarea id="rcBody" placeholder="यह video ने क्या सिखाया..."></textarea>
+      <button class="btn gold wide2" id="rcSave" style="margin-top:10px">+ Save Lesson</button>
+      <div id="rcList" style="margin-top:14px"></div>
+    </div>
+  `;
+  const list = $('#rcList');
+  const paint = ()=>{
+    const A = S.cards||[];
+    list.innerHTML = A.length? A.slice().reverse().map((c,i)=>{
+      const idx = A.length-1-i;
+      return `<div class="kv"><span><b>${c.date}</b><br>${(c.body||'').slice(0,120)}</span>
+        <button class="btn sm danger" onclick="vsrDelCard(${idx})">×</button></div>`;
+    }).join('') : `<div class="empty"><b>कोई card नहीं</b></div>`;
+  };
+  paint();
+  $('#rcSave').onclick = ()=>{
+    const b = $('#rcBody').value.trim(); if(!b){ SFX.bad(); return; }
+    S.cards = S.cards||[]; S.cards.push({date:todayISO(), body:b}); save();
+    $('#rcBody').value=''; paint(); SFX.ok();
+  };
+}
+window.vsrDelCard = i => { S.cards.splice(i,1); save(); renderCard(); SFX.tap(); };
+
+function renderNotes(){
+  const root = $('#vd-notes');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">🔔</span> Notes &amp; Reminders</h3>
+      <div class="row">
+        <div style="flex:3"><input id="nInput" placeholder="ब्रेन-डंप..."></div>
+        <div style="flex:0 0 auto"><button class="btn gold" id="nAdd">+ Add</button></div>
+      </div>
+      <div id="nList" style="margin-top:14px"></div>
+    </div>
+  `;
+  const list = $('#nList');
+  const paint = ()=>{
+    const A = S.notes||[];
+    list.innerHTML = A.length? A.map((n,i)=>{
+      return n.done
+        ? `<div class="kv"><span style="text-decoration:line-through;opacity:.6">${n.txt}</span>
+            <button class="btn sm" onclick="vsrToggleNote(${i})">Undo</button>
+            <button class="btn sm danger" onclick="vsrDelNote(${i})">×</button></div>`
+        : `<div class="kv" style="border-color:rgba(255,77,94,.6); background:rgba(255,77,94,.06)"><span><span class="pill bad">PENDING</span> ${n.txt}</span>
+            <button class="btn sm primary" onclick="vsrToggleNote(${i})">Done ✓</button>
+            <button class="btn sm danger" onclick="vsrDelNote(${i})">×</button></div>`;
+    }).join('') : `<div class="empty"><b>कोई note नहीं</b></div>`;
+  };
+  paint();
+  $('#nAdd').onclick = ()=>{
+    const t = $('#nInput').value.trim(); if(!t){ SFX.bad(); return; }
+    S.notes = S.notes||[]; S.notes.push({txt:t, done:false, ts:Date.now()}); save();
+    $('#nInput').value=''; paint(); SFX.ok();
+  };
+}
+window.vsrToggleNote = i => { S.notes[i].done = !S.notes[i].done; save(); renderNotes(); SFX.tap(); };
+window.vsrDelNote = i => { S.notes.splice(i,1); save(); renderNotes(); SFX.tap(); };
+
+function renderVault(){
+  const root = $('#vd-manifest');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">👑</span> Milestones</h3>
+      <div class="row">
+        <div style="flex:3"><input id="mInput" placeholder="1M subscribers"></div>
+        <div style="flex:0 0 auto"><button class="btn gold" id="mAdd">+ Add</button></div>
+      </div>
+      <div id="mList" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <h3><span class="ic">💰</span> Bank Balance Card</h3>
+      <div class="row">
+        <div style="flex:1"><label class="f">Current Balance (₹)</label><input id="bankInput" type="number" value="${S.manifest?.bank||0}"></div>
+        <div style="flex:0 0 auto"><button class="btn gold" id="bankSave">Save</button></div>
+      </div>
+    </div>
+  `;
+  const list = $('#mList');
+  const paint = ()=>{
+    const A = S.manifest?.milestones||[];
+    list.innerHTML = A.length? A.map((m,i)=>`<div class="kv"><span><b>${m}</b></span>
+      <button class="btn sm danger" onclick="vsrDelM(${i})">×</button></div>`).join('') : `<div class="empty"><b>कोई milestone नहीं</b></div>`;
+  };
+  paint();
+  $('#mAdd').onclick = ()=>{
+    const t = $('#mInput').value.trim(); if(!t){ SFX.bad(); return; }
+    S.manifest = S.manifest||{milestones:[],cars:[],bank:0};
+    S.manifest.milestones.push(t); save();
+    $('#mInput').value=''; paint(); SFX.ok();
+  };
+  $('#bankSave').onclick = ()=>{
+    S.manifest = S.manifest||{}; S.manifest.bank = +$('#bankInput').value||0; save();
+    SFX.ok(); toast('Saved ✓');
+  };
+}
+window.vsrDelM = i => { S.manifest.milestones.splice(i,1); save(); renderVault(); SFX.tap(); };
+
+function renderWeekly(){
+  const root = $('#vd-weekly');
+  const A = S.logs||[];
+  const last7 = A.filter(l => (Date.now()-new Date(l.date).getTime()) < 7*86400e3);
+  const v = last7.map(l=>+l.v7).filter(x=>x>0);
+  const sum = v.reduce((x,y)=>x+y,0);
+  const avg = v.length?Math.round(sum/v.length):0;
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">▦</span> Weekly Auto-Summary</h3>
+      <div class="grid g3">
+        <div class="kpi"><div class="lab">Videos</div><div class="val">${last7.length}</div><div class="foot">last 7d</div></div>
+        <div class="kpi"><div class="lab">Total Views</div><div class="val">${sum}</div><div class="foot">sum</div></div>
+        <div class="kpi"><div class="lab">Avg / Video</div><div class="val">${avg}</div><div class="foot">mean</div></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRules(){
+  const root = $('#vd-rules');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">⚖</span> Rulebook</h3>
+      <p class="hint">अपने channel के नियम। Ask में इन्हीं से जवाब आता है।</p>
+      <textarea id="rulesInput" style="min-height:240px" placeholder="- हर video 8 मिनट से कम,
+- हर video में एक hook पहले 5 सेकंड में,
+- कोई clickbait नहीं, ...">${S.rules||''}</textarea>
+      <button class="btn gold wide2" id="rulesSave" style="margin-top:10px">💾 Save Rules</button>
+    </div>
+  `;
+  $('#rulesSave').onclick = ()=>{ S.rules = $('#rulesInput').value; save(); SFX.ok(); toast('Rules saved'); };
+}
+
+function renderAsk(){
+  const root = $('#vd-ask');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">?</span> पूछिए — Rulebook से जवाब</h3>
+      <div class="row">
+        <div style="flex:3"><input id="askInput" placeholder="जैसे: 8 मिनट से लंबा video ठीक है?"></div>
+        <div style="flex:0 0 auto"><button class="btn primary" id="askGo">पूछिए</button></div>
+      </div>
+      <div class="note" style="margin-top:14px">
+        सीधा जवाब। कोई fluff नहीं। अपने rulebook से।
+      </div>
+      <div id="askOut" style="margin-top:14px"></div>
+    </div>
+  `;
+  $('#askGo').onclick = ()=>{
+    const q = $('#askInput').value.trim(); if(!q) return;
+    const rules = (S.rules||'').split('\n').filter(Boolean);
+    const m = rules.find(r => q.toLowerCase().split(/\s+/).some(w => r.toLowerCase().includes(w)));
+    $('#askOut').innerHTML = `<div class="card"><div class="note goodb"><b>आपका सवाल:</b> ${q}</div><div class="note warnb"><b>Rulebook से:</b> ${m||'कोई rule नहीं मिला — rules में जोड़ें।'}</div></div>`;
+    SFX.ok();
+  };
+}
+
+function renderSettings(){
+  const root = $('#vd-settings');
+  root.innerHTML = `
+    <div class="card">
+      <h3><span class="ic">⚙</span> Settings</h3>
+      <div class="row" style="margin-top:10px">
+        <div><label class="f">Language</label>
+          <select id="sLang">
+            <option value="hi" ${S.lang==='hi'?'selected':''}>हिंदी</option>
+            <option value="en" ${S.lang==='en'?'selected':''}>English</option>
+            <option value="hg" ${S.lang==='hg'?'selected':''}>Hinglish</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><label class="f">Change PIN</label><input id="sPin" type="password" placeholder="नया PIN"></div>
+        <div style="flex:0 0 auto"><button class="btn gold" id="sPinSave">Save PIN</button></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div style="flex:1"><button class="btn wide2" id="clearPat">🗑 Pattern हटाएँ</button></div>
+        <div style="flex:1"><button class="btn wide2" id="clearBio">🗑 Face ID हटाएँ</button></div>
+        <div style="flex:1"><button class="btn wide2" id="clearAll">⚠ सब Reset</button></div>
+      </div>
+      <p class="note warnb" style="margin-top:14px">
+        <b>Reality check:</b> यह एक offline HTML app है। कोई भी browser app webcam से असली "face match" नहीं कर सकती — Face ID यहाँ WebAuthn है (आपके फ़ोन की अपनी biometric)। Voice = passphrase convenience। दोनों 100% spoof-proof नहीं हैं।
+      </p>
+    </div>
+  `;
+  $('#sLang').onchange = e => { S.lang = e.target.value; save(); SFX.tap(); };
+  $('#sPinSave').onclick = ()=>{
+    const v = $('#sPin').value.trim();
+    if(v.length<4){ SFX.bad(); toast('कम से कम 4 अंक'); return; }
+    S.pin = hash(v); save(); SFX.ok(); toast('PIN बदल गया ✓'); $('#sPin').value='';
+  };
+  $('#clearPat').onclick = ()=>{ if(confirm('Pattern हटाएँ?')){ S.pat=null; save(); SFX.tap(); toast('Pattern removed'); }};
+  $('#clearBio').onclick = ()=>{ if(confirm('Face ID हटाएँ?')){ S.bioId=null; save(); SFX.tap(); toast('Face ID removed'); }};
+  $('#clearAll').onclick = ()=>{
+    if(!confirm('पूरा डेटा reset? यह undo नहीं होगा।')) return;
+    localStorage.removeItem('vsrC3');
+    location.reload();
+  };
+}
+
+/* ===========================================================
+   TIE UP
+   =========================================================== */
+const renderers = { overview:renderOverview, comp:renderComp, topics:renderTopics,
+  script:renderScript, log:renderLog, card:renderCard, notes:renderNotes,
+  manifest:renderVault, weekly:renderWeekly, rules:renderRules, ask:renderAsk,
+  settings:renderSettings };
+function renderView(v){ if(renderers[v]) try{ renderers[v](); }catch(e){ console.error('render',v,e); } }
+window.showView = showView;
+window.closeModal = closeModal;
+
+/* First-time onboarding gate */
+if(!S.onboarded){
+  $('#onboard').style.display = 'flex';
+  $('#onbGo').onclick = ()=>{
+    const a = $('#onbPin').value.trim(), b = $('#onbPin2').value.trim();
+    if(a.length<4){ $('#onbErr').textContent='कम से कम 4 अंक'; SFX.bad(); return; }
+    if(a!==b){ $('#onbErr').textContent='PIN मेल नहीं खाया'; SFX.bad(); return; }
+    S.pin = hash(a); S.onboarded = true; save();
+    SFX.unlock(); toast('Vault बन गया ✓');
+    $('#onboard').style.display = 'none';
+    $('#lockScreen').classList.add('on');
+    setLockMode('pin');
+    drawDots();
+  };
+}
+
+/* Init lock screen (always required) */
+$('#lockScreen').classList.add('on');
+setLockMode('pin');
+drawDots();
+
+/* Service Worker — register for PWA offline */
+if('serviceWorker' in location && location.protocol !== 'file:'){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+/* On any unlock-ready click outside boot, ensure first touch triggers audio */
+window.addEventListener('pointerdown', ()=>{ const ac=audioCtx(); if(ac && ac.state==='suspended') ac.resume(); }, {once:true});
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
